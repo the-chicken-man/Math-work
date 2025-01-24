@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>One-Player Pong</title>
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            color: white;
+        }
+        canvas {
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pongCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('pongCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Ball properties
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 10,
+            speedX: 4,
+            speedY: 4,
+        };
+
+        // Paddle properties
+        const paddleWidth = 10, paddleHeight = 100;
+        const paddle = { x: 10, y: canvas.height / 2 - paddleHeight / 2, speed: 5, dy: 0 };
+
+        // Score
+        let score = 0;
+
+        // Game loop
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Update positions
+        function update() {
+            // Ball movement
+            ball.x += ball.speedX;
+            ball.y += ball.speedY;
+
+            // Ball collision with walls
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+                ball.speedY = -ball.speedY;
+            }
+
+            // Ball collision with paddle
+            if (
+                ball.x - ball.radius < paddle.x + paddleWidth &&
+                ball.y > paddle.y &&
+                ball.y < paddle.y + paddleHeight
+            ) {
+                ball.speedX = -ball.speedX;
+                score++; // Increase score when the ball hits the paddle
+            }
+
+            // Reset game if the ball misses the paddle
+            if (ball.x - ball.radius < 0) {
+                resetGame();
+            }
+
+            // Paddle movement
+            paddle.y += paddle.dy;
+
+            // Keep paddle within bounds
+            paddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, paddle.y));
+        }
+
+        // Reset the game
+        function resetGame() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.speedX = 4;
+            ball.speedY = 4;
+            score = 0; // Reset score
+        }
+
+        // Draw everything
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ball
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw paddle
+            ctx.fillRect(paddle.x, paddle.y, paddleWidth, paddleHeight);
+
+            // Draw score
+            ctx.font = '24px Arial';
+            ctx.fillText(`Score: ${score}`, canvas.width - 150, 50);
+        }
+
+        // Control paddle
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'ArrowUp') paddle.dy = -paddle.speed;
+            if (event.key === 'ArrowDown') paddle.dy = paddle.speed;
+        });
+
+        document.addEventListener('keyup', (event) => {
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') paddle.dy = 0;
+        });
+
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>
