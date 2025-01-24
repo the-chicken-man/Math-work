@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pong Game</title>
+    <title>Smooth Pong</title>
     <style>
         body {
             margin: 0;
@@ -14,7 +14,6 @@
             height: 100vh;
             overflow: hidden;
             color: white;
-            font-family: Arial, sans-serif;
         }
         canvas {
             border: 2px solid white;
@@ -38,8 +37,8 @@
 
         // Paddle properties
         const paddleWidth = 10, paddleHeight = 100;
-        const leftPaddle = { x: 10, y: canvas.height / 2 - paddleHeight / 2, speed: 5 };
-        const rightPaddle = { x: canvas.width - paddleWidth - 10, y: canvas.height / 2 - paddleHeight / 2, speed: 5 };
+        const leftPaddle = { x: 10, y: canvas.height / 2 - paddleHeight / 2, speed: 5, dy: 0 };
+        const rightPaddle = { x: canvas.width - paddleWidth - 10, y: canvas.height / 2 - paddleHeight / 2, speed: 5, dy: 0 };
 
         // Player scores
         let leftScore = 0, rightScore = 0;
@@ -84,12 +83,9 @@
                 resetBall();
             }
 
-            // Paddle movement (basic AI for right paddle)
-            if (ball.y > rightPaddle.y + paddleHeight / 2) {
-                rightPaddle.y += rightPaddle.speed;
-            } else {
-                rightPaddle.y -= rightPaddle.speed;
-            }
+            // Paddle movement
+            leftPaddle.y += leftPaddle.dy;
+            rightPaddle.y += rightPaddle.dy;
 
             // Keep paddles within bounds
             leftPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddle.y));
@@ -125,10 +121,17 @@
             ctx.fillText(rightScore, (3 * canvas.width) / 4, 50);
         }
 
-        // Control left paddle with keyboard
+        // Control paddles
         document.addEventListener('keydown', (event) => {
-            if (event.key === 'w') leftPaddle.y -= leftPaddle.speed * 2;
-            if (event.key === 's') leftPaddle.y += leftPaddle.speed * 2;
+            if (event.key === 'w') leftPaddle.dy = -leftPaddle.speed;
+            if (event.key === 's') leftPaddle.dy = leftPaddle.speed;
+            if (event.key === 'ArrowUp') rightPaddle.dy = -rightPaddle.speed;
+            if (event.key === 'ArrowDown') rightPaddle.dy = rightPaddle.speed;
+        });
+
+        document.addEventListener('keyup', (event) => {
+            if (event.key === 'w' || event.key === 's') leftPaddle.dy = 0;
+            if (event.key === 'ArrowUp' || event.key === 'ArrowDown') rightPaddle.dy = 0;
         });
 
         // Start the game loop
@@ -136,3 +139,4 @@
     </script>
 </body>
 </html>
+
