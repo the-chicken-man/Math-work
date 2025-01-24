@@ -1,0 +1,138 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Pong Game</title>
+    <style>
+        body {
+            margin: 0;
+            background: black;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            overflow: hidden;
+            color: white;
+            font-family: Arial, sans-serif;
+        }
+        canvas {
+            border: 2px solid white;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="pongCanvas" width="800" height="600"></canvas>
+    <script>
+        const canvas = document.getElementById('pongCanvas');
+        const ctx = canvas.getContext('2d');
+
+        // Ball properties
+        const ball = {
+            x: canvas.width / 2,
+            y: canvas.height / 2,
+            radius: 10,
+            speedX: 4,
+            speedY: 4,
+        };
+
+        // Paddle properties
+        const paddleWidth = 10, paddleHeight = 100;
+        const leftPaddle = { x: 10, y: canvas.height / 2 - paddleHeight / 2, speed: 5 };
+        const rightPaddle = { x: canvas.width - paddleWidth - 10, y: canvas.height / 2 - paddleHeight / 2, speed: 5 };
+
+        // Player scores
+        let leftScore = 0, rightScore = 0;
+
+        // Game loop
+        function gameLoop() {
+            update();
+            draw();
+            requestAnimationFrame(gameLoop);
+        }
+
+        // Update positions
+        function update() {
+            // Ball movement
+            ball.x += ball.speedX;
+            ball.y += ball.speedY;
+
+            // Ball collision with walls
+            if (ball.y - ball.radius < 0 || ball.y + ball.radius > canvas.height) {
+                ball.speedY = -ball.speedY;
+            }
+
+            // Ball collision with paddles
+            if (ball.x - ball.radius < leftPaddle.x + paddleWidth &&
+                ball.y > leftPaddle.y &&
+                ball.y < leftPaddle.y + paddleHeight) {
+                ball.speedX = -ball.speedX;
+            }
+            if (ball.x + ball.radius > rightPaddle.x &&
+                ball.y > rightPaddle.y &&
+                ball.y < rightPaddle.y + paddleHeight) {
+                ball.speedX = -ball.speedX;
+            }
+
+            // Scoring
+            if (ball.x - ball.radius < 0) {
+                rightScore++;
+                resetBall();
+            }
+            if (ball.x + ball.radius > canvas.width) {
+                leftScore++;
+                resetBall();
+            }
+
+            // Paddle movement (basic AI for right paddle)
+            if (ball.y > rightPaddle.y + paddleHeight / 2) {
+                rightPaddle.y += rightPaddle.speed;
+            } else {
+                rightPaddle.y -= rightPaddle.speed;
+            }
+
+            // Keep paddles within bounds
+            leftPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, leftPaddle.y));
+            rightPaddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, rightPaddle.y));
+        }
+
+        // Reset ball to the center
+        function resetBall() {
+            ball.x = canvas.width / 2;
+            ball.y = canvas.height / 2;
+            ball.speedX = -ball.speedX;
+        }
+
+        // Draw everything
+        function draw() {
+            // Clear canvas
+            ctx.fillStyle = 'black';
+            ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+            // Draw ball
+            ctx.fillStyle = 'white';
+            ctx.beginPath();
+            ctx.arc(ball.x, ball.y, ball.radius, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw paddles
+            ctx.fillRect(leftPaddle.x, leftPaddle.y, paddleWidth, paddleHeight);
+            ctx.fillRect(rightPaddle.x, rightPaddle.y, paddleWidth, paddleHeight);
+
+            // Draw scores
+            ctx.font = '24px Arial';
+            ctx.fillText(leftScore, canvas.width / 4, 50);
+            ctx.fillText(rightScore, (3 * canvas.width) / 4, 50);
+        }
+
+        // Control left paddle with keyboard
+        document.addEventListener('keydown', (event) => {
+            if (event.key === 'w') leftPaddle.y -= leftPaddle.speed * 2;
+            if (event.key === 's') leftPaddle.y += leftPaddle.speed * 2;
+        });
+
+        // Start the game loop
+        gameLoop();
+    </script>
+</body>
+</html>
