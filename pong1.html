@@ -79,7 +79,8 @@
             paddle.y += paddle.dy;
 
             // Keep paddle within bounds
-            paddle.y = Math.max(0, Math.min(canvas.height - paddleHeight, paddle.y));
+            if (paddle.y < 0) paddle.y = 0;
+            if (paddle.y + paddleHeight > canvas.height) paddle.y = canvas.height - paddleHeight;
         }
 
         // Reset the game
@@ -104,6 +105,7 @@
             ctx.fill();
 
             // Draw paddle
+            ctx.fillStyle = 'white';
             ctx.fillRect(paddle.x, paddle.y, paddleWidth, paddleHeight);
 
             // Draw score
@@ -126,3 +128,4 @@
     </script>
 </body>
 </html>
+
